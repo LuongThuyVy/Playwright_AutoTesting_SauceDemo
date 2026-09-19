@@ -1,4 +1,3 @@
-````markdown
 # Playwright Automation Testing
 
 This project contains automated UI tests using **Playwright + TypeScript**.
@@ -32,7 +31,7 @@ playwright1_project/
 │
 ├── tests/
 │   └── Login/
-│       └── list_tc1_validation_admin.spec.ts
+│       └── list_validation_admin.spec.ts
 │
 ├── screenshots/
 │   └── Login/
@@ -111,7 +110,7 @@ Represents one individual test case.
 
 ```ts
 test(
-  'TC01 - Login successfully with valid credentials',
+  'TC01 - Login successfully with valid username and valid password',
   async ({ page }) => {
 
   }
@@ -122,7 +121,7 @@ test(
 
 This project uses a custom `step()` helper instead of calling `test.step()` directly.
 
-The custom `step()` automatically takes a screenshot after the step completes successfully.
+The custom `step()` wraps Playwright's `test.step()` and automatically takes a screenshot after the step completes successfully.
 
 ```ts
 await step(
@@ -239,16 +238,13 @@ The screenshot helper is responsible for:
 
 ```ts
 import { Page, test } from '@playwright/test';
-
 import fs from 'fs';
-
 import path from 'path';
 
 export async function capture(
   page: Page,
   stepName: string
 ) {
-
   const testInfo = test.info();
 
   // -----------------------------------------
@@ -378,23 +374,19 @@ export async function capture(
   });
 }
 
-
 // =====================================================
 // Convert text to PascalCase words separated by "_"
 // =====================================================
 
 function toPascalCase(value: string): string {
-
   return value
     .split(/[_\s-]+/)
     .filter(Boolean)
     .map((word) => {
-
       return (
         word.charAt(0).toUpperCase() +
         word.slice(1).toLowerCase()
       );
-
     })
     .join('_');
 }
@@ -449,7 +441,7 @@ import { step } from '../../helpers/step';
 test.describe('Login Test Suite', () => {
 
   test(
-    'TC01 - Login successfully with valid credentials',
+    'TC01 - Login successfully with valid username and valid password',
     async ({ page }) => {
 
       await step(
@@ -528,24 +520,18 @@ The project is configured to use **Brave Browser**.
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
-
   testDir: './tests',
 
   use: {
-
     headless: false,
 
     browserName: 'chromium',
 
     launchOptions: {
-
       executablePath:
         '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser',
-
     },
-
   },
-
 });
 ```
 
@@ -590,7 +576,7 @@ npm install -D @types/node
 
 ---
 
-# 10. Run the Application
+# 10. Run the Tests
 
 This project does not have a local application server.
 
@@ -621,7 +607,7 @@ Brave will open while the tests are running.
 For example:
 
 ```bash
-npx playwright test tests/Login/list_tc1_validation_admin.spec.ts
+npx playwright test tests/Login/list_validation_admin.spec.ts
 ```
 
 ---
@@ -658,24 +644,17 @@ Contents:
 const { chromium } = require('@playwright/test');
 
 (async () => {
-
   const browser = await chromium.launch({
-
     headless: false,
-
     executablePath:
       '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser',
-
   });
 
   const context = await browser.newContext();
-
   const page = await context.newPage();
 
   await page.goto('https://www.saucedemo.com/');
-
   await page.pause();
-
 })();
 ```
 
@@ -852,7 +831,7 @@ npx playwright test
 ## Run a specific test file
 
 ```bash
-npx playwright test tests/Login/list_tc1_validation_admin.spec.ts
+npx playwright test tests/Login/list_validation_admin.spec.ts
 ```
 
 ## Run Codegen with Brave
@@ -987,7 +966,55 @@ No successful-step screenshot
 
 ---
 
-# 20. Summary
+# 20. Git / GitHub
+
+The project can be version-controlled using Git and pushed to GitHub.
+
+## Check Git status
+
+```bash
+git status
+```
+
+## Add changes
+
+```bash
+git add .
+```
+
+## Commit changes
+
+```bash
+git commit -m "Update Playwright tests"
+```
+
+## Push changes
+
+```bash
+git push
+```
+
+After making changes, the typical workflow is:
+
+```text
+Modify files
+    │
+    ▼
+git status
+    │
+    ▼
+git add .
+    │
+    ▼
+git commit -m "commit message"
+    │
+    ▼
+git push
+```
+
+---
+
+# 21. Summary
 
 The main Playwright workflow for this project is:
 
@@ -1027,13 +1054,19 @@ npm install
 npx playwright test
 
 # Run a specific test
-npx playwright test tests/Login/list_tc1_validation_admin.spec.ts
+npx playwright test tests/Login/list_validation_admin.spec.ts
 
 # Start Codegen with Brave
 node codegen.js
 
 # Open test report
 npx playwright show-report
+
+# Check Git status
+git status
+
+# Push changes to GitHub
+git push
 ```
 
 ## Core Project Pattern
@@ -1047,7 +1080,7 @@ import { step } from '../../helpers/step';
 test.describe('Login Test Suite', () => {
 
   test(
-    'TC01 - Login successfully with valid credentials',
+    'TC01 - Login successfully with valid username and valid password',
     async ({ page }) => {
 
       await step(
@@ -1103,4 +1136,3 @@ test.describe('Login Test Suite', () => {
 ```
 
 This keeps the test case focused on **test actions and expected results**, while `step.ts` and `screenshot.ts` handle the automatic screenshot functionality.
-````
