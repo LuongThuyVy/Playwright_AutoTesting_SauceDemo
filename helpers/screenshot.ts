@@ -108,8 +108,8 @@ export async function capture(
   // Create screenshot filename
   // -----------------------------------------
 
-  const screenshotName =
-    `${folderName}_${cleanFileName}_${testCaseName}_${stepNumber}_${cleanStepName}.png`;
+const screenshotName =
+  `${folderName}_${testCaseName}_${stepNumber}_${cleanStepName}_${cleanFileName}.png`;
 
   const screenshotPath = path.join(
     screenshotFolder,
