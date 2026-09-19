@@ -7,9 +7,10 @@ export async function step(
   action: () => Promise<void>
 ) {
   await test.step(name, async () => {
-    await action();
-
-    // Screenshot only if the step succeeded
-    await capture(page, name);
+    try {
+      await action();
+    } finally {
+      await capture(page, name);
+    }
   });
 }
