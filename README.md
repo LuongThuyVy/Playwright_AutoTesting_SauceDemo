@@ -24,6 +24,7 @@ https://www.saucedemo.com/
 
 ```text
 playwright1_project/
+
 │
 ├── helpers/
 │   ├── screenshot.ts
@@ -35,11 +36,11 @@ playwright1_project/
 │
 ├── screenshots/
 │   └── Login/
-│       ├── Login_List_Validation_Admin_TC01_Step1_Navigate_To_Login_Page.png
-│       ├── Login_List_Validation_Admin_TC01_Step2_Enter_Valid_Username.png
-│       ├── Login_List_Validation_Admin_TC01_Step3_Enter_Valid_Password.png
-│       ├── Login_List_Validation_Admin_TC01_Step4_Click_Login_Button.png
-│       └── Login_List_Validation_Admin_TC01_Step5_Verify_Products_Page.png
+│       ├── Login_TC01_Step1_Navigate_To_Login_Page_List_Validation_Admin.png
+│       ├── Login_TC01_Step2_Enter_Valid_Username_List_Validation_Admin.png
+│       ├── Login_TC01_Step3_Enter_Valid_Password_List_Validation_Admin.png
+│       ├── Login_TC01_Step4_Click_Login_Button_List_Validation_Admin.png
+│       └── Login_TC01_Step5_Verify_Products_Page_List_Validation_Admin.png
 │
 ├── codegen.js
 ├── playwright.config.ts
@@ -79,20 +80,44 @@ Test Suite
     │   ├── step()
     │   ├── step()
     │   ├── step()
-    │   └── expect()
+    │   ├── step()
+    │   └── step()
+    │       └── expect()
     │
     ├── test()
     │   │
     │   ├── step()
     │   ├── step()
-    │   └── expect()
+    │   └── step()
+    │       └── expect()
     │
     └── test()
         │
         ├── step()
         ├── step()
-        └── expect()
+        └── step()
+            └── expect()
 ```
+
+The project follows the pattern:
+
+```text
+test.describe()
+      │
+      ▼
+    test()
+      │
+      ▼
+    step()
+      │
+      ▼
+   action()
+      │
+      ▼
+    expect()
+```
+
+The `expect()` assertion is placed inside the **last step** of each test case.
 
 ## `test.describe()`
 
@@ -128,7 +153,9 @@ await step(
   page,
   '1. Navigate to Login page',
   async () => {
+
     await page.goto('https://www.saucedemo.com/');
+
   }
 );
 ```
@@ -161,11 +188,25 @@ Therefore, screenshots are captured **only after successful steps**.
 
 ## `expect()`
 
-Used to verify the expected result.
+`expect()` is used to verify the expected result.
+
+In this project, the assertion is placed inside the **last step** of the test case.
+
+Example:
 
 ```ts
-await expect(page).toHaveURL(/inventory/);
+await step(
+  page,
+  '5. Verify Products page',
+  async () => {
+
+    await expect(page).toHaveURL(/inventory/);
+
+  }
+);
 ```
+
+This keeps the test case organized as a sequence of steps while keeping the final verification inside the last step.
 
 ---
 
@@ -175,6 +216,7 @@ The project uses two helper files:
 
 ```text
 helpers/
+
 ├── step.ts
 └── screenshot.ts
 ```
@@ -205,17 +247,30 @@ Instead of:
 
 ```ts
 await test.step('Enter username', async () => {
-  await page.getByPlaceholder('Username').fill('standard_user');
+
+  await page
+    .getByPlaceholder('Username')
+    .fill('standard_user');
+
   await capture(page);
+
 });
 ```
 
 use:
 
 ```ts
-await step(page, '2. Enter valid username', async () => {
-  await page.getByPlaceholder('Username').fill('standard_user');
-});
+await step(
+  page,
+  '2. Enter valid username',
+  async () => {
+
+    await page
+      .getByPlaceholder('Username')
+      .fill('standard_user');
+
+  }
+);
 ```
 
 ---
@@ -357,7 +412,7 @@ export async function capture(
   // -----------------------------------------
 
   const screenshotName =
-    `${folderName}_${cleanFileName}_${testCaseName}_${stepNumber}_${cleanStepName}.png`;
+    `${folderName}_${testCaseName}_${stepNumber}_${cleanStepName}_${cleanFileName}.png`;
 
   const screenshotPath = path.join(
     screenshotFolder,
@@ -399,13 +454,13 @@ function toPascalCase(value: string): string {
 Screenshots follow this format:
 
 ```text
-FolderName_FileName_TCNumber_StepNumber_StepName.png
+FolderName_TCNumber_StepNumber_StepName_FileName.png
 ```
 
 For example:
 
 ```text
-Login_List_Validation_Admin_TC01_Step2_Enter_Valid_Username.png
+Login_TC01_Step2_Enter_Valid_Username_List_Validation_Admin.png
 ```
 
 The filename is generated from:
@@ -415,17 +470,39 @@ Login
 │
 ├── Test folder
 │
-├── List_Validation_Admin
-│   └── Test filename
-│
 ├── TC01
 │   └── Test case ID
 │
 ├── Step2
 │   └── Step number
 │
-└── Enter_Valid_Username
-    └── Step name
+├── Enter_Valid_Username
+│   └── Step name
+│
+└── List_Validation_Admin
+    └── Test filename
+```
+
+The filename order is:
+
+```text
+FolderName
+    ↓
+TCNumber
+    ↓
+StepNumber
+    ↓
+StepName
+    ↓
+FileName
+    ↓
+.png
+```
+
+Example:
+
+```text
+Login_TC01_Step2_Enter_Valid_Username_List_Validation_Admin.png
 ```
 
 ---
@@ -433,6 +510,8 @@ Login
 # 7. Complete Test Example
 
 The test file uses the custom `step()` helper.
+
+The final step contains the assertion using `expect()`.
 
 ```ts
 import { test, expect } from '@playwright/test';
@@ -448,7 +527,9 @@ test.describe('Login Test Suite', () => {
         page,
         '1. Navigate to Login page',
         async () => {
+
           await page.goto('https://www.saucedemo.com/');
+
         }
       );
 
@@ -456,9 +537,11 @@ test.describe('Login Test Suite', () => {
         page,
         '2. Enter valid username',
         async () => {
+
           await page
             .getByPlaceholder('Username')
             .fill('standard_user');
+
         }
       );
 
@@ -466,9 +549,11 @@ test.describe('Login Test Suite', () => {
         page,
         '3. Enter valid password',
         async () => {
+
           await page
             .getByPlaceholder('Password')
             .fill('secret_sauce');
+
         }
       );
 
@@ -476,9 +561,11 @@ test.describe('Login Test Suite', () => {
         page,
         '4. Click Login button',
         async () => {
+
           await page
             .getByRole('button', { name: 'Login' })
             .click();
+
         }
       );
 
@@ -486,7 +573,9 @@ test.describe('Login Test Suite', () => {
         page,
         '5. Verify Products page',
         async () => {
+
           await expect(page).toHaveURL(/inventory/);
+
         }
       );
 
@@ -501,12 +590,19 @@ This test contains five steps, so five screenshots will be created:
 ```text
 screenshots/
 └── Login/
-    ├── Login_List_Validation_Admin_TC01_Step1_Navigate_To_Login_Page.png
-    ├── Login_List_Validation_Admin_TC01_Step2_Enter_Valid_Username.png
-    ├── Login_List_Validation_Admin_TC01_Step3_Enter_Valid_Password.png
-    ├── Login_List_Validation_Admin_TC01_Step4_Click_Login_Button.png
-    └── Login_List_Validation_Admin_TC01_Step5_Verify_Products_Page.png
+
+    ├── Login_TC01_Step1_Navigate_To_Login_Page_List_Validation_Admin.png
+
+    ├── Login_TC01_Step2_Enter_Valid_Username_List_Validation_Admin.png
+
+    ├── Login_TC01_Step3_Enter_Valid_Password_List_Validation_Admin.png
+
+    ├── Login_TC01_Step4_Click_Login_Button_List_Validation_Admin.png
+
+    └── Login_TC01_Step5_Verify_Products_Page_List_Validation_Admin.png
 ```
+
+The final screenshot is taken after the assertion succeeds.
 
 ---
 
@@ -520,18 +616,24 @@ The project is configured to use **Brave Browser**.
 import { defineConfig } from '@playwright/test';
 
 export default defineConfig({
+
   testDir: './tests',
 
   use: {
+
     headless: false,
 
     browserName: 'chromium',
 
     launchOptions: {
+
       executablePath:
         '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser',
+
     },
+
   },
+
 });
 ```
 
@@ -556,7 +658,7 @@ executablePath
 Brave Browser
 ```
 
-This allows the project to run using the installed Brave browser without requiring Playwright's bundled Chromium.
+This allows the project to run using the installed Brave Browser without requiring Playwright's bundled Chromium.
 
 ---
 
@@ -644,17 +746,24 @@ Contents:
 const { chromium } = require('@playwright/test');
 
 (async () => {
+
   const browser = await chromium.launch({
+
     headless: false,
+
     executablePath:
       '/Applications/Brave Browser.app/Contents/MacOS/Brave Browser',
+
   });
 
   const context = await browser.newContext();
+
   const page = await context.newPage();
 
   await page.goto('https://www.saucedemo.com/');
+
   await page.pause();
+
 })();
 ```
 
@@ -718,6 +827,12 @@ Copy useful code
      │
      ▼
 Add code to *.spec.ts
+     │
+     ▼
+Organize actions into step()
+     │
+     ▼
+Add expect() to the final step
      │
      ▼
 Run the test
@@ -806,10 +921,24 @@ Each test can then contain multiple:
 step()
 ```
 
-and assertions using:
+The final `step()` contains the expected result using:
 
 ```ts
 expect()
+```
+
+For example:
+
+```text
+TC01
+│
+├── Step 1: Navigate
+├── Step 2: Enter username
+├── Step 3: Enter password
+├── Step 4: Click Login
+└── Step 5: Verify Products page
+              │
+              └── expect()
 ```
 
 ---
@@ -874,7 +1003,7 @@ For a new feature, the general workflow is:
 7. Organize actions into step()
         │
         ▼
-8. Add assertions using expect()
+8. Add expect() to the final step
         │
         ▼
 9. Run the test
@@ -922,47 +1051,75 @@ Stop test       capture()
               Save screenshot
 ```
 
+For the final verification step:
+
+```text
+Final step
+    │
+    ▼
+Execute action
+    │
+    ▼
+expect()
+    │
+    ├── Failed
+    │     │
+    │     └── Test fails
+    │
+    └── Success
+          │
+          ▼
+       capture()
+          │
+          ▼
+      Screenshot
+```
+
 For example:
 
 ```ts
 await step(
   page,
-  '2. Enter valid username',
+  '5. Verify Products page',
   async () => {
-    await page
-      .getByPlaceholder('Username')
-      .fill('standard_user');
+
+    await expect(page).toHaveURL(/inventory/);
+
   }
 );
 ```
 
-If the action succeeds:
+If the assertion succeeds:
 
 ```text
-Enter username
-      ↓
-fill()
-      ↓
+Verify Products page
+        ↓
+expect()
+        ↓
 Success
-      ↓
+        ↓
 capture()
-      ↓
-Login_List_Validation_Admin_TC01_Step2_Enter_Valid_Username.png
+        ↓
+Screenshot
+        ↓
+Login_TC01_Step5_Verify_Products_Page_List_Validation_Admin.png
 ```
 
-If the action fails:
+If the assertion fails:
 
 ```text
-Enter username
-      ↓
-fill()
-      ↓
+Verify Products page
+        ↓
+expect()
+        ↓
 Failure
-      ↓
-Test stops
-      ↓
-No successful-step screenshot
+        ↓
+Test fails
+        ↓
+capture() is not executed
 ```
+
+Therefore, the current screenshot system captures screenshots **only after successful steps**.
 
 ---
 
@@ -1020,6 +1177,7 @@ The main Playwright workflow for this project is:
 
 ```text
                          Playwright
+
                               │
                 ┌─────────────┴─────────────┐
                 │                           │
@@ -1035,13 +1193,13 @@ The main Playwright workflow for this project is:
                                             │
                                          action
                                             │
-                                      capture()
+                                      expect()
+                                            │
+                                         capture()
                                             │
                                       Screenshot
                                             │
-                                         expect()
-                                            │
-                                          Brave
+                                         Brave
 ```
 
 ## Main Commands
@@ -1087,7 +1245,9 @@ test.describe('Login Test Suite', () => {
         page,
         '1. Navigate to Login page',
         async () => {
+
           await page.goto('https://www.saucedemo.com/');
+
         }
       );
 
@@ -1095,9 +1255,11 @@ test.describe('Login Test Suite', () => {
         page,
         '2. Enter valid username',
         async () => {
+
           await page
             .getByPlaceholder('Username')
             .fill('standard_user');
+
         }
       );
 
@@ -1105,9 +1267,11 @@ test.describe('Login Test Suite', () => {
         page,
         '3. Enter valid password',
         async () => {
+
           await page
             .getByPlaceholder('Password')
             .fill('secret_sauce');
+
         }
       );
 
@@ -1115,9 +1279,11 @@ test.describe('Login Test Suite', () => {
         page,
         '4. Click Login button',
         async () => {
+
           await page
             .getByRole('button', { name: 'Login' })
             .click();
+
         }
       );
 
@@ -1125,7 +1291,9 @@ test.describe('Login Test Suite', () => {
         page,
         '5. Verify Products page',
         async () => {
+
           await expect(page).toHaveURL(/inventory/);
+
         }
       );
 
@@ -1135,4 +1303,16 @@ test.describe('Login Test Suite', () => {
 });
 ```
 
-This keeps the test case focused on **test actions and expected results**, while `step.ts` and `screenshot.ts` handle the automatic screenshot functionality.
+This structure keeps the test case focused on **test actions and expected results**, while `step.ts` and `screenshot.ts` handle the automatic screenshot functionality.
+
+The final `step()` contains the `expect()` assertion, so the test flow is:
+
+```text
+Action steps
+    ↓
+Final verification step
+    ↓
+expect()
+    ↓
+Screenshot after successful verification
+```
